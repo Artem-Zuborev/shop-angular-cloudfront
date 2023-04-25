@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { EMPTY, Observable, of, throwError } from 'rxjs';
+import { catchError, EMPTY, Observable, of } from "rxjs";
 import { map } from 'rxjs/operators';
 
 import { Product } from './product.interface';
@@ -12,15 +12,8 @@ import { ApiService } from '../core/api.service';
 })
 export class ProductsService extends ApiService {
   createNewProduct(product: Product): Observable<Product> {
-    if (!this.endpointEnabled('bff')) {
-      console.warn(
-        'Endpoint "bff" is disabled. To enable change your environment.ts config'
-      );
-      return EMPTY;
-    }
-
-    const url = this.getUrl('bff', 'products');
-    return this.http.post<Product>(url, product);
+    const url = 'https://b4vrhcoxd4.execute-api.eu-west-1.amazonaws.com/dev/products';
+    return this.http.put<Product>(url, product);
   }
 
   editProduct(id: string, changedProduct: Product): Observable<Product> {
@@ -41,15 +34,17 @@ export class ProductsService extends ApiService {
         'Endpoint "bff" is disabled. To enable change your environment.ts config'
       );
       return this.http
-        .get<Product[]>('/assets/products.json')
+        .get<Product>('https://b4vrhcoxd4.execute-api.eu-west-1.amazonaws.com/dev/products/' + id)
         .pipe(
-          map(
-            (products) => products.find((product) => product.id === id) || null
-          )
+          map((product) => product),
+          catchError((error: unknown) => {
+            console.error('An error occurred:', error);
+            return of(null);
+          })
         );
     }
 
-    const url = this.getUrl('bff', `products/${id}`);
+    const url = `https://b4vrhcoxd4.execute-api.eu-west-1.amazonaws.com/dev/products/${id}`;
     return this.http
       .get<{ product: Product }>(url)
       .pipe(map((resp) => resp.product));
@@ -60,7 +55,7 @@ export class ProductsService extends ApiService {
       console.warn(
         'Endpoint "bff" is disabled. To enable change your environment.ts config'
       );
-      return this.http.get<Product[]>('/assets/products.json');
+      return this.http.get<Product[]>('https://b4vrhcoxd4.execute-api.eu-west-1.amazonaws.com/dev/products');
     }
 
     const url = this.getUrl('bff', 'products');
