@@ -12,15 +12,8 @@ import { ApiService } from '../core/api.service';
 })
 export class ProductsService extends ApiService {
   createNewProduct(product: Product): Observable<Product> {
-    if (!this.endpointEnabled('bff')) {
-      console.warn(
-        'Endpoint "bff" is disabled. To enable change your environment.ts config'
-      );
-      return EMPTY;
-    }
-
-    const url = this.getUrl('bff', 'products');
-    return this.http.post<Product>(url, product);
+    const url = 'https://b4vrhcoxd4.execute-api.eu-west-1.amazonaws.com/dev/products';
+    return this.http.put<Product>(url, product);
   }
 
   editProduct(id: string, changedProduct: Product): Observable<Product> {
@@ -51,7 +44,7 @@ export class ProductsService extends ApiService {
         );
     }
 
-    const url = this.getUrl('bff', `products/${id}`);
+    const url = `https://b4vrhcoxd4.execute-api.eu-west-1.amazonaws.com/dev/products/${id}`;
     return this.http
       .get<{ product: Product }>(url)
       .pipe(map((resp) => resp.product));
